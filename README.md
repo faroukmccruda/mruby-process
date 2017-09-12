@@ -1,4 +1,4 @@
-# mruby-process <br> [![Build Status](https://travis-ci.org/appPlant/mruby-process.svg?branch=windows)](https://travis-ci.org/appPlant/mruby-process) [![Build status](https://ci.appveyor.com/api/projects/status/1uu04u7wtbup1oqk/branch/windows?svg=true)](https://ci.appveyor.com/project/katzer/mruby-process/branch/windows) [![codebeat badge](https://codebeat.co/badges/02e9d761-e8b6-4939-9ef2-b88fd0c93a84)](https://codebeat.co/projects/github-com-appplant-mruby-process-windows)
+# mruby-process <br> [![Build Status](https://travis-ci.org/appPlant/mruby-process.svg?branch=master)](https://travis-ci.org/appPlant/mruby-process) [![Build status](https://ci.appveyor.com/api/projects/status/1uu04u7wtbup1oqk/branch/master?svg=true)](https://ci.appveyor.com/project/katzer/mruby-process/branch/master) [![codebeat badge](https://codebeat.co/badges/3c7b24ef-f3d1-460d-95f1-b55b997cbe86)](https://codebeat.co/projects/github-com-appplant-mruby-process-master)
 
 Implementation of the Ruby 2.4.1 Core Library _Process_ for [mruby][mruby].
 
@@ -205,7 +205,7 @@ DEALINGS IN THE SOFTWARE.
 
 
 [mruby]: https://github.com/mruby/mruby
-[process_h]: https://github.com/appPlant/mruby-process/blob/windows/include/mruby/ext/process.h
+[process_h]: https://github.com/appPlant/mruby-process/blob/master/include/mruby/ext/process.h
 [mruby-process-ext]: https://github.com/ksss/mruby-process-ext
 [mruby-process-sys]: https://github.com/haconiwa/mruby-process-sys
 [mruby-sleep]: https://github.com/matsumotory/mruby-sleep
