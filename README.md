@@ -44,7 +44,6 @@ MRuby::Gem::Specification.new('your-mrbgem') do |spec|
 end
 ```
 
-
 ## Implemented methods
 
 ### Process
@@ -105,7 +104,6 @@ end
 | #waitpid                   |       o       |
 | #waitpid2                  |       o       |
 
-
 ### Process::Status
 
 - https://ruby-doc.org/core-2.4.1/Process/Status.html
@@ -129,7 +127,6 @@ end
 | #termsig                   |       o       |
 | #to_i                      |       o       |
 | #to_s                      |       o       |
-
      
 ### Kernel
 
@@ -147,7 +144,6 @@ end
 | #spawn                     |       o       |
 | #system                    |       o       |
 
-
 ### Signal
 
 - https://ruby-doc.org/core-2.4.1/Signal.html
@@ -157,7 +153,6 @@ end
 | ::signame                  |       o       |
 | ::list                     |       o       |
 | ::trap                     |               | Implemented in [mruby-signal][mruby-signal]. |
-
 
 ## Development
 
@@ -178,7 +173,6 @@ Run the tests:
 
  - $? may not work correctly on the platform where ``pid_t`` is not ``int`` or
    ``MRB_INT_MAX`` is less than ``PID_MAX`` (or /proc/sys/kernel/pid_max).
-
 
 ## License
 

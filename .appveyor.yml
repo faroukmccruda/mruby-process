@@ -22,41 +22,36 @@
 
 version: "{build}"
 
-image:
-- Visual Studio 2015
-
 environment:
   global:
-    VCVARSALL: C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat
-    CC: gcc
+    TOOLCHAIN: gcc
   matrix:
   - MRUBY_VERSION: 1.2.0
-    COMPILER: C:\MinGW # MinGW 32-bit 5.3.0
+    COMPILER: C:\MinGW
+  - MRUBY_VERSION: 1.2.0
+    COMPILER: C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0
+  - MRUBY_VERSION: 1.2.0
+    COMPILER: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1
   - MRUBY_VERSION: 1.3.0
-    COMPILER: C:\MinGW # MinGW 32-bit 5.3.0
-  - MRUBY_VERSION: head
-    COMPILER: C:\MinGW # MinGW 32-bit 5.3.0
-    CFLAGS: -m32
-  - MRUBY_VERSION: head
-    COMPILER: C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0 # MinGW-w64 5.3.0
-  - MRUBY_VERSION: head
-    COMPILER: C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1 # MinGW-w64 6.3.0
+    COMPILER: C:\MinGW
   - MRUBY_VERSION: 1.3.0
-    COMPILER: C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC # Visual Studio 2015
-    CC: visualcpp
+    COMPILER: C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0
+  - MRUBY_VERSION: 1.3.0
+    COMPILER: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1
+  - MRUBY_VERSION: head
+    COMPILER: C:\MinGW
+  - MRUBY_VERSION: head
+    COMPILER: C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0
+  - MRUBY_VERSION: head
+    COMPILER: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1
 
 matrix:
   allow_failures:
-  - CC: visualcpp
-  exclude:
-  - CC: visualcpp
-  - CFLAGS: -m32
+  - MRUBY_VERSION: head
 
 init:
-- CALL "%VCVARSALL%" amd64
-- SET PATH=%COMPILER%\bin;%PATH%
-- SET PATH=C:\Ruby23-x64\bin;%PATH%
-- SET PATH=C:\cygwin\bin;%PATH%
+- SET PATH=C:\Windows\system32;C:\Windows;C:\Program Files\Git\cmd;%PATH%
+- SET PATH=%COMPILER%\bin;C:\Ruby24-x64\bin;%PATH%;C:\cygwin\bin;
 - gcc --version
 
 build_script:
