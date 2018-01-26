@@ -32,6 +32,7 @@ MRuby::Gem::Specification.new('mruby-process') do |spec|
   spec.add_test_dependency 'mruby-print', core: 'mruby-print'
   spec.add_test_dependency 'mruby-env',   mgem: 'mruby-env'
   spec.add_test_dependency 'mruby-os',    mgem: 'mruby-os'
+  spec.add_test_dependency 'mruby-io',    core: 'mruby-io'
 
   spec.mruby.cc.defines << 'HAVE_MRB_PROCESS_H'
 
@@ -43,9 +44,7 @@ MRuby::Gem::Specification.new('mruby-process') do |spec|
 
   if target_win32?
     spec.objs.delete objfile("#{build_dir}/src/posix")
-    spec.add_test_dependency 'mruby-tiny-io', mgem: 'mruby-tiny-io'
   else
     spec.objs.delete objfile("#{build_dir}/src/win32")
-    spec.add_test_dependency 'mruby-io', mgem: 'mruby-io'
   end
 end
