@@ -48,6 +48,8 @@ init:
 - gcc --version
 
 build_script:
+- rake mruby
+- DEL /F /Q mruby\mrbgems\mruby-io\test
 - rake compile
 
 test_script:
