@@ -19,9 +19,10 @@
  * SOFTWARE.
  */
 
+#include "mruby.h"
+
 #if !defined(__APPLE__) && !defined(__linux__)
 
-#include "mruby.h"
 #include <windows.h>
 #include <io.h>
 
