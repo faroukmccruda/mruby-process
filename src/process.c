@@ -254,10 +254,8 @@ mrb_f_waitall(mrb_state *mrb, mrb_value klass)
     pid = mrb_waitpid(-1, &status, 0);
 
     if (pid == -1) {
-      int e = errno;
-
-    if (e == ECHILD)
-      break;
+      if (errno == ECHILD)
+        break;
 
       mrb_sys_fail(mrb, "waitall failed");
     }
