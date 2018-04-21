@@ -47,4 +47,6 @@ MRuby::Gem::Specification.new('mruby-process') do |spec|
   else
     spec.objs.delete objfile("#{build_dir}/src/win32")
   end
+
+  FileUtils.mkdir_p "#{MRUBY_ROOT}/tmp"
 end

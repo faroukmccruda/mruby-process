@@ -323,6 +323,7 @@ mrb_spawn_internal(mrb_state *mrb, mrb_value klass)
 {
   struct mrb_execarg *eargp;
   pid_t pid;
+  char **p;
 
   eargp = mrb_execarg_new(mrb);
 
@@ -330,6 +331,13 @@ mrb_spawn_internal(mrb_state *mrb, mrb_value klass)
     pid = spawnve(eargp->filename, eargp->argv, eargp->envp, eargp->fd.in, eargp->fd.out, eargp->fd.err);
   else
     pid = spawnv(eargp->filename, eargp->argv, eargp->fd.in, eargp->fd.out, eargp->fd.err);
+
+  if (eargp->envp) {
+    for (p = eargp->envp; *p; ++p) { free(*p); }
+    mrb_free(mrb, eargp->envp);
+  }
+
+  mrb_free(mrb, eargp->argv);
 
   free(eargp);
 

@@ -114,14 +114,14 @@ mrb_execarg_fill(mrb_state *mrb, mrb_value env, mrb_value *argv, mrb_int argc, m
         result = (char **)mrb_malloc(mrb, sizeof(char *) * (argc + 3));
 
     #if defined(__APPLE__) || defined(__linux__)
+        static char default_shell[] = "/bin/sh", default_shell_mod[] = "-c";
         shell = getenv("SHELL");
-        if (!shell) shell = strdup("bin/sh");
-        shell_mod = strdup("-c");
     #else
+        static char default_shell[] = "C:\\WINDOWS\\system32\\cmd.exe", default_shell_mod[] = "/c";
         shell = getenv("ComSpec");
-        if (!shell) shell = strdup("C:\\WINDOWS\\system32\\cmd.exe");
-        shell_mod = strdup("/c");
     #endif
+        if (!shell) shell = default_shell;
+        shell_mod = default_shell_mod;
         mrb_build_shell_array(mrb, argv, argc, shell, shell_mod, result);
         argc+=2;
     }
@@ -161,7 +161,7 @@ mrb_execarg_fill(mrb_state *mrb, mrb_value env, mrb_value *argv, mrb_int argc, m
             mrb_value val  = mrb_hash_get(mrb, env, key);
             mrb_value skey = mrb_symbol_p(key) ? mrb_sym2str(mrb, mrb_symbol(key)) : key;
             mrb_value sval = mrb_convert_type(mrb, val, MRB_TT_STRING, "String", "to_s");
-            mrb_int slen   = RSTRING_LEN(skey) + RSTRING_LEN(sval) + 1;
+            mrb_int slen   = RSTRING_LEN(skey) + RSTRING_LEN(sval) + 2;
             char str[slen];
 
             sprintf(str, "%s=%s",
