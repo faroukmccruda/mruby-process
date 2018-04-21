@@ -29,6 +29,8 @@
 #include <errno.h>
 #include <tchar.h>
 #include <stdio.h>
+#include <io.h>
+#include <fcntl.h>
 
 #define BUFSIZE 4096
 
@@ -60,10 +62,11 @@ static struct ChildRecord *FindChildSlot(pid_t pid);
 static struct ChildRecord *FindChildSlotByHandle(HANDLE h);
 static struct ChildRecord *FindFreeChildSlot(void);
 static void CloseChildHandle(struct ChildRecord *child);
-static struct ChildRecord *CreateChild(const WCHAR *cmd, const WCHAR *prog, SECURITY_ATTRIBUTES *psa, HANDLE hInput, HANDLE hOutput, HANDLE hError, DWORD dwCreationFlags, LPVOID environment);
+static struct ChildRecord *CreateChild(const WCHAR *cmd, const WCHAR *prog, HANDLE hIn, HANDLE hOut, HANDLE hErr, LPVOID env);
 static pid_t child_result(struct ChildRecord *child, int mode);
 static char* argv_to_str(char* const* argv);
 static WCHAR* str_to_wstr(const char *utf8, int mlen);
+static HANDLE fd_to_handle(mrb_value fd, int def_fd);
 
 mrb_value
 mrb_argv0(mrb_state *mrb)
@@ -295,15 +298,14 @@ spawnve(const char *shell, char *const argv[], char *const envp[], mrb_value in,
     char tCmd[strlen(cmd)];
     char tShell[strlen(shell)];
 
-    input  = mrb_cptr_p(in)  ? mrb_cptr(in)  : GetStdHandle(STD_INPUT_HANDLE);
-    output = mrb_cptr_p(out) ? mrb_cptr(out) : GetStdHandle(STD_OUTPUT_HANDLE);
-    error  = mrb_cptr_p(err) ? mrb_cptr(err) : GetStdHandle(STD_ERROR_HANDLE);
+    input  = fd_to_handle(in, STD_INPUT_HANDLE);
+    output = fd_to_handle(out, STD_OUTPUT_HANDLE);
+    error  = fd_to_handle(err, STD_ERROR_HANDLE);
 
     lpszCurrentVariable = (LPTSTR) chNewEnv;
 
     while (env != NULL) {
         if (FAILED(strcpy(lpszCurrentVariable, TEXT(env)))) {
-            printf("env-string copy failed\n");
             return FALSE;
         }
 
@@ -321,7 +323,7 @@ spawnve(const char *shell, char *const argv[], char *const envp[], mrb_value in,
     wshell = str_to_wstr(tShell, strlen(tShell));
     wcmd   = str_to_wstr(tCmd, strlen(tCmd));
 
-    ret = child_result(CreateChild(wshell, wcmd, NULL, input, output, error, 0, (LPVOID) chNewEnv), P_NOWAIT);
+    ret = child_result(CreateChild(wshell, wcmd, input, output, error, (LPVOID) chNewEnv), P_NOWAIT);
 
     free(wshell);
     free(wcmd);
@@ -341,15 +343,14 @@ spawnv(const char *shell, char *const argv[], mrb_value in, mrb_value out, mrb_v
 
     strcpy(tShell, shell);
 
-    input  = mrb_cptr_p(in)  ? mrb_cptr(in)  : GetStdHandle(STD_INPUT_HANDLE);
-    output = mrb_cptr_p(out) ? mrb_cptr(out) : GetStdHandle(STD_OUTPUT_HANDLE);
-    error  = mrb_cptr_p(err) ? mrb_cptr(err) : GetStdHandle(STD_ERROR_HANDLE);
+    input  = fd_to_handle(in, STD_INPUT_HANDLE);
+    output = fd_to_handle(out, STD_OUTPUT_HANDLE);
+    error  = fd_to_handle(err, STD_ERROR_HANDLE);
 
     wshell = str_to_wstr(tShell, strlen(tShell));
     wcmd   = str_to_wstr(cmd, strlen(cmd));
 
-    ret    = child_result(
-        CreateChild(wshell, wcmd, NULL, input, output, error, 0, NULL), P_NOWAIT);
+    ret = child_result(CreateChild(wshell, wcmd, input, output, error, NULL), P_NOWAIT);
 
     free(wshell);
     free(wcmd);
@@ -385,12 +386,11 @@ get_proc_address(const char *module, const char *func, HANDLE *mh)
 }
 
 static struct ChildRecord *
-CreateChild(const WCHAR *shell, const WCHAR *cmd, SECURITY_ATTRIBUTES *psa,
-        HANDLE hInput, HANDLE hOutput, HANDLE hError, DWORD dwCreationFlags, LPVOID env)
+CreateChild(const WCHAR *shell, const WCHAR *cmd, HANDLE hIn, HANDLE hOut, HANDLE hErr, LPVOID env)
 {
     BOOL fRet;
-    STARTUPINFOW aStartupInfo;
-    PROCESS_INFORMATION aProcessInformation;
+    STARTUPINFOW si;
+    PROCESS_INFORMATION pi;
     SECURITY_ATTRIBUTES sa;
     struct ChildRecord *child;
 
@@ -402,60 +402,39 @@ CreateChild(const WCHAR *shell, const WCHAR *cmd, SECURITY_ATTRIBUTES *psa,
     if (!child)
         return NULL;
 
-    if (!psa) {
-        sa.nLength              = sizeof (SECURITY_ATTRIBUTES);
-        sa.lpSecurityDescriptor = NULL;
-        sa.bInheritHandle       = TRUE;
-        psa = &sa;
-    }
+    sa.nLength              = sizeof(SECURITY_ATTRIBUTES);
+    sa.lpSecurityDescriptor = NULL;
+    sa.bInheritHandle       = TRUE;
 
-    memset(&aStartupInfo, 0, sizeof(aStartupInfo));
-    memset(&aProcessInformation, 0, sizeof(aProcessInformation));
+    ZeroMemory(&si, sizeof(si));
+    ZeroMemory(&pi, sizeof(pi));
 
-    aStartupInfo.cb      = sizeof(aStartupInfo);
-    aStartupInfo.dwFlags = STARTF_USESTDHANDLES;
-
-    if (hInput) {
-       aStartupInfo.hStdInput  = hInput;
-    }
-    else {
-       aStartupInfo.hStdInput  = GetStdHandle(STD_INPUT_HANDLE);
-    }
-
-    if (hOutput) {
-       aStartupInfo.hStdOutput = hOutput;
-    }
-    else {
-       aStartupInfo.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-    }
-
-    if (hError) {
-       aStartupInfo.hStdError = hError;
-    }
-    else {
-       aStartupInfo.hStdError = GetStdHandle(STD_ERROR_HANDLE);
-    }
-
-    dwCreationFlags |= NORMAL_PRIORITY_CLASS;
+    si.cb          = sizeof(si);
+    si.dwFlags    |= STARTF_USESHOWWINDOW;
+    si.wShowWindow = SW_HIDE;
+    si.dwFlags    |= STARTF_USESTDHANDLES;
+    si.hStdInput   = hIn;
+    si.hStdOutput  = hOut;
+    si.hStdError   = hErr;
 
     if (lstrlenW(cmd) > 32767) {
-        child->pid = 0;     /* release the slot */
+        child->pid = 0;
         return NULL;
     }
 
-    fRet = CreateProcessW(shell, (WCHAR *)cmd, psa, psa,
-                          psa->bInheritHandle, dwCreationFlags, env, NULL,
-                          &aStartupInfo, &aProcessInformation);
+    fRet = CreateProcessW(shell, (WCHAR *)cmd, &sa, &sa,
+                          TRUE, NORMAL_PRIORITY_CLASS, env, NULL,
+                          &si, &pi);
 
     if (!fRet) {
-        child->pid = 0;     /* release the slot */
+        child->pid = 0;
         return NULL;
     }
 
-    CloseHandle(aProcessInformation.hThread);
+    CloseHandle(pi.hThread);
 
-    child->hProcess = aProcessInformation.hProcess;
-    child->pid      = (pid_t)aProcessInformation.dwProcessId;
+    child->hProcess = pi.hProcess;
+    child->pid      = (pid_t)pi.dwProcessId;
 
     return child;
 }
@@ -590,4 +569,14 @@ str_to_wstr(const char *utf8, int mlen)
         utf16[wlen] = 0;
 
     return utf16;
+}
+
+static HANDLE
+fd_to_handle(mrb_value fd, int std_fd)
+{
+    if (!mrb_fixnum_p(fd)) {
+        return GetStdHandle(std_fd);
+    } else {
+        return (HANDLE) _get_osfhandle(mrb_fixnum(fd));
+    }
 }

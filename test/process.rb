@@ -30,7 +30,7 @@ class String
   end
 end unless ''.respond_to? :strip
 
-def IO.sysopen(path, mod)
+def IO.sysopen(path, mod, *)
   ProcessTest.sysopen(path, mod)
 end if OS.windows?
 
@@ -141,8 +141,7 @@ end
 assert('Process.spawn', 'pipe stdout') do
   begin
     var = ENV['RAND']
-    pip = IO.sysopen('tmp/pipe.txt', 'w')
-
+    pip = IO.sysopen('tmp/pipe.txt', 'w+')
     pid = spawn("echo #{var}", out: pip)
 
     wait_for_pid(pid)
@@ -159,19 +158,20 @@ assert('Process.spawn', 'pipe stdout') do
     wait_for_pid(pid)
     assert_include read('tmp/pipe.txt'), 'ruby'
   ensure
-    IO._sysclose(pip) if OS.posix?
+    IO._sysclose(pip)
   end
 end
 
 assert('Process.spawn', 'pipe stderr') do
   begin
     pip = IO.sysopen('tmp/pipe.err', 'w')
+    puts pip.inspect
     pid = spawn('ruby unknown', err: pip)
 
     wait_for_pid(pid)
     assert_false read('tmp/pipe.err').empty?
   ensure
-    IO._sysclose(pip) if OS.posix?
+    IO._sysclose(pip)
   end
 end
 

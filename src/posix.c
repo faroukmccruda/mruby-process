@@ -59,36 +59,6 @@ mrb_progname(mrb_state *mrb)
 }
 
 pid_t
-spawnv(const char *path, char *const argv[], mrb_value in, mrb_value out, mrb_value err)
-{
-    pid_t pid;
-    posix_spawn_file_actions_t action;
-
-    posix_spawn_file_actions_init(&action);
-
-
-    if(mrb_fixnum_p(in)){
-      posix_spawn_file_actions_adddup2 (&action, mrb_fixnum(in), 0);
-    }
-
-    if(mrb_fixnum_p(out)){
-      posix_spawn_file_actions_adddup2 (&action, mrb_fixnum(out), 1);
-    }
-
-    if(mrb_fixnum_p(err)){
-      posix_spawn_file_actions_adddup2 (&action, mrb_fixnum(err), 2);
-    }
-
-    if (posix_spawn(&pid, path, &action, NULL, argv, NULL) != 0)
-        return -1;
-
-
-    posix_spawn_file_actions_destroy(&action);
-
-    return pid;
-}
-
-pid_t
 spawnve(const char *path, char *const argv[], char *const envp[], mrb_value in, mrb_value out, mrb_value err)
 {
     pid_t pid;
@@ -96,16 +66,16 @@ spawnve(const char *path, char *const argv[], char *const envp[], mrb_value in, 
 
     posix_spawn_file_actions_init(&action);
 
-    if(mrb_fixnum_p(in)){
-      posix_spawn_file_actions_adddup2 (&action, mrb_fixnum(in), 0);
+    if (mrb_fixnum_p(in)) {
+        posix_spawn_file_actions_adddup2(&action, mrb_fixnum(in), 0);
     }
 
-    if(mrb_fixnum_p(out)){
-      posix_spawn_file_actions_adddup2 (&action, mrb_fixnum(out), 1);
+    if (mrb_fixnum_p(out)) {
+        posix_spawn_file_actions_adddup2(&action, mrb_fixnum(out), 1);
     }
 
-    if(mrb_fixnum_p(err)){
-      posix_spawn_file_actions_adddup2 (&action, mrb_fixnum(err), 2);
+    if (mrb_fixnum_p(err)) {
+        posix_spawn_file_actions_adddup2(&action, mrb_fixnum(err), 2);
     }
 
     if (posix_spawn(&pid, path, &action, NULL, argv, envp) != 0)
@@ -114,4 +84,10 @@ spawnve(const char *path, char *const argv[], char *const envp[], mrb_value in, 
     posix_spawn_file_actions_destroy(&action);
 
     return pid;
+}
+
+pid_t
+spawnv(const char *path, char *const argv[], mrb_value in, mrb_value out, mrb_value err)
+{
+    return spawnve(path, argv, NULL, in, out, err);
 }

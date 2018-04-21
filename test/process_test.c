@@ -19,36 +19,30 @@
  * SOFTWARE.
  */
 
-#include "mruby.h"
-
 #if !defined(__APPLE__) && !defined(__linux__)
 
-#include "mruby/string.h"
+#include "mruby.h"
 #include <windows.h>
 #include <io.h>
 
 static mrb_value
-mrb_process_mock_sysopen(mrb_state *mrb, mrb_value self)
+mrb_process_test_sysopen(mrb_state *mrb, mrb_value self)
 {
     mrb_int file_len, mod_len;
     char *file, *mod;
-    HANDLE handle;
 
     mrb_get_args(mrb, "ss", &file, &file_len, &mod, &mod_len);
 
-    handle = (HANDLE) _get_osfhandle(fileno(fopen(file, mod)));
-
-    return mrb_cptr_value(mrb, handle);
+    return mrb_fixnum_value(fileno(fopen(file, mod)));
 }
 
 #endif
-
 
 void
 mrb_mruby_process_gem_test(mrb_state* mrb)
 {
 #if !defined(__APPLE__) && !defined(__linux__)
     struct RClass *pt = mrb_define_module(mrb, "ProcessTest");
-    mrb_define_class_method(mrb, pt, "sysopen", mrb_process_mock_sysopen, MRB_ARGS_REQ(2));
+    mrb_define_class_method(mrb, pt, "sysopen", mrb_process_test_sysopen, MRB_ARGS_REQ(2));
 #endif
 }
