@@ -32,7 +32,6 @@ file :mruby do
   end
 end
 
-FileUtils.mkdir_p('tmp')
 Rake::Task[:mruby].invoke
 
 namespace :mruby do
