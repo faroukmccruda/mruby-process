@@ -76,11 +76,15 @@ assert_windows('Process.argv0') do
 end
 
 assert('$0') do
+  skip if $0.nil?
+
   assert_raise(RuntimeError, 'Should be frozen') { $0.upcase! }
   assert_not_include ['/', '\\'], $0
 end
 
 assert('$PROGRAM_NAME') do
+  skip if $PROGRAM_NAME.nil?
+
   assert_raise(RuntimeError, 'Should be frozen') { $PROGRAM_NAME.upcase! }
   assert_equal $0, $PROGRAM_NAME
 end
