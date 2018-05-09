@@ -35,7 +35,7 @@ def IO.sysopen(path, mod, *)
 end if OS.windows?
 
 def read(path)
-  File.read("#{ENV['TEMP']}/#{path}").to_s.strip
+  File.read("#{ENV['_TMP']}/#{path}").to_s.strip
       .sub("\r", '').sub("\n", '')
       .downcase
 end
@@ -111,7 +111,7 @@ assert('Process.spawn') do
   assert_raise(ArgumentError) { spawn }
   assert_raise(TypeError) { spawn 123 }
 
-  pid = spawn 'exit 0'
+  pid = spawn('exit 0')
   wait_for_pid(pid)
 
   assert_kind_of Integer, pid
@@ -121,7 +121,7 @@ assert('Process.spawn') do
   assert_equal $?.pid, pid
 
   var = "#{ENV['RAND']}x"
-  pid = spawn("echo #{var} > #{ENV['TEMP']}/spawn.txt")
+  pid = spawn("echo #{var} > #{ENV['_TMP']}/spawn.txt")
 
   wait_for_pid(pid)
   assert_equal var, read('spawn.txt')
@@ -131,7 +131,7 @@ assert('Process.spawn', 'env') do
   var = "x#{ENV['RAND']}"
   env = OS.posix? ? '$MYVAR' : '%MYVAR%'
 
-  pid = spawn({ MYVAR: var }, "echo #{env} > #{ENV['TEMP']}/spawn.txt")
+  pid = spawn({ MYVAR: var }, "echo #{env} > #{ENV['_TMP']}/spawn.txt")
 
   wait_for_pid(pid)
   assert_equal var, read('spawn.txt')
@@ -140,7 +140,7 @@ end
 assert('Process.spawn', 'pipe stdout') do
   begin
     var = ENV['RAND']
-    pip = IO.sysopen("#{ENV['TEMP']}/pipe.txt", 'w+')
+    pip = IO.sysopen("#{ENV['_TMP']}/pipe.txt", 'w+')
     pid = spawn("echo #{var}", out: pip)
 
     wait_for_pid(pid)
@@ -152,7 +152,7 @@ assert('Process.spawn', 'pipe stdout') do
     wait_for_pid(pid)
     assert_equal var * 2, read('pipe.txt')
 
-    pid = spawn 'ruby', '-v', out: pip
+    pid = spawn('ruby', '-v', out: pip)
 
     wait_for_pid(pid)
     assert_include read('pipe.txt'), 'ruby'
@@ -163,8 +163,7 @@ end
 
 assert('Process.spawn', 'pipe stderr') do
   begin
-    pip = IO.sysopen("#{ENV['TEMP']}/pipe.err", 'w')
-    puts pip.inspect
+    pip = IO.sysopen("#{ENV['_TMP']}/pipe.err", 'w')
     pid = spawn('ruby unknown', err: pip)
 
     wait_for_pid(pid)
@@ -181,13 +180,13 @@ end
 
 assert_not_windows('Process.exec') do
   var = ENV['RAND']
-  pid = fork { exec({ MYVAR: var }, "echo $MYVAR > #{ENV['TEMP']}/exec.txt") }
+  pid = fork { exec({ MYVAR: var }, "echo $MYVAR > #{ENV['_TMP']}/exec.txt") }
 
   wait_for_pid(pid)
   assert_equal var, read('exec.txt')
 
   var = "x#{var}"
-  pid = fork { exec '/bin/sh', '-c', "echo #{var} > #{ENV['TEMP']}/exec.txt" }
+  pid = fork { exec '/bin/sh', '-c', "echo #{var} > #{ENV['_TMP']}/exec.txt" }
 
   wait_for_pid(pid)
   assert_equal var, read('exec.txt')
@@ -197,7 +196,7 @@ assert_not_windows('Process.exec', '$SHELL') do
   ['/bin/bash', '/bin/sh'].each do |shell|
     ENV['SHELL'] = shell
 
-    pid = fork { exec "echo $SHELL > #{ENV['TEMP']}/exec.txt" }
+    pid = fork { exec "echo $SHELL > #{ENV['_TMP']}/exec.txt" }
     wait_for_pid(pid)
 
     assert_equal shell, read('exec.txt')
@@ -222,7 +221,7 @@ assert('Process.wait2') do
   assert_nil p
   assert_nil st
 
-  Process.kill :KILL, pid
+  Process.kill(:KILL, pid)
 
   loop do
     p, st = Process.waitpid2(pid, Process::WNOHANG)
@@ -275,7 +274,7 @@ assert('Process.system') do
   var = ENV['RAND']
   env = OS.posix? ? '$MYVAR' : '%MYVAR%'
 
-  system({ MYVAR: var }, "echo #{env} > #{ENV['TEMP']}/system.txt")
+  system({ MYVAR: var }, "echo #{env} > #{ENV['_TMP']}/system.txt")
 
   assert_equal var, read('system.txt')
 end

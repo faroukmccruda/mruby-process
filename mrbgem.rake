@@ -49,8 +49,8 @@ MRuby::Gem::Specification.new('mruby-process') do |spec|
 
   if build.test_enabled?
     ENV['RAND'] = Time.now.to_i.to_s
-    ENV['TEMP'] = File.join(dir, 'tmp')
-    FileUtils.mkdir_p(ENV['TEMP'])
+    ENV['_TMP'] = File.join(dir, 'tmp')
+    FileUtils.mkdir_p(ENV['_TMP'])
   end
 
   if target_win32?
