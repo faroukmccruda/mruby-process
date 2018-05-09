@@ -20,24 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-version: "{build}"
+image: Visual Studio 2017
 
 environment:
   global:
     TOOLCHAIN: gcc
+    COMPILER: C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64
   matrix:
   - MRUBY_VERSION: 1.4.1
-    COMPILER: C:\MinGW
-  - MRUBY_VERSION: 1.4.1
-    COMPILER: C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0
-  - MRUBY_VERSION: 1.4.1
-    COMPILER: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1
   - MRUBY_VERSION: head
-    COMPILER: C:\MinGW
-  - MRUBY_VERSION: head
-    COMPILER: C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0
-  - MRUBY_VERSION: head
-    COMPILER: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1
 
 matrix:
   allow_failures:
@@ -48,8 +39,6 @@ init:
 - gcc --version
 
 build_script:
-- rake mruby
-- DEL /F /Q mruby\mrbgems\mruby-io\test
 - rake compile
 
 test_script:
