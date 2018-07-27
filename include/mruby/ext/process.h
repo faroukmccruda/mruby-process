@@ -22,13 +22,11 @@
 #ifndef MRB_PROCESS_H
 #define MRB_PROCESS_H 1
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
 #include "mruby.h"
 #include <signal.h>
 #include <sys/types.h>
+
+MRB_BEGIN_DECL
 
 #ifndef WNOHANG
 # define WNOHANG -1
@@ -70,28 +68,27 @@ extern "C" {
 # define WSTOPSIG        WEXITSTATUS
 #endif
 
-mrb_value mrb_progname(mrb_state *mrb);
-mrb_value mrb_argv0(mrb_state *mrb);
+MRB_API mrb_value mrb_progname(mrb_state *mrb);
+MRB_API mrb_value mrb_argv0(mrb_state *mrb);
 
-mrb_value mrb_last_status_get(mrb_state *mrb);
-void mrb_last_status_set(mrb_state *mrb, pid_t pid, mrb_int status);
-void mrb_last_status_clear(mrb_state *mrb);
+MRB_API mrb_value mrb_last_status_get(mrb_state *mrb);
+MRB_API void mrb_last_status_set(mrb_state *mrb, pid_t pid, mrb_int status);
+MRB_API void mrb_last_status_clear(mrb_state *mrb);
 
-void _exit(int status);
-void exit(int status);
+MRB_API void _exit(int status);
+MRB_API void exit(int status);
 
-int   getpid(void);
-pid_t getppid(void);
-pid_t waitpid(pid_t pid, int *stat_loc, int options);
+MRB_API int   getpid(void);
+MRB_API pid_t getppid(void);
+MRB_API pid_t waitpid(pid_t pid, int *stat_loc, int options);
 
-int fork(void);
-pid_t spawnv(const char *path, char *const argv[], mrb_value in, mrb_value out, mrb_value err);
-pid_t spawnve(const char *path, char *const argv[], char *const envp[], mrb_value in, mrb_value out, mrb_value err);
-int execv(const char *path, char *const argv[]);
-int execve(const char *path, char *const argv[], char *const envp[]);
-int kill(pid_t pid, int sig);
+MRB_API int fork(void);
+MRB_API pid_t spawnv(const char *path, char *const argv[], mrb_value in, mrb_value out, mrb_value err);
+MRB_API pid_t spawnve(const char *path, char *const argv[], char *const envp[], mrb_value in, mrb_value out, mrb_value err);
+MRB_API int execv(const char *path, char *const argv[]);
+MRB_API int execve(const char *path, char *const argv[], char *const envp[]);
+MRB_API int kill(pid_t pid, int sig);
 
-#if defined(__cplusplus)
-} /* extern "C" { */
+MRB_END_DECL
+
 #endif
-#endif /* MRB_PROCESS_H */
