@@ -41,6 +41,7 @@ MRuby::Gem::Specification.new('mruby-process') do |spec|
   end
 
   spec.mruby.cc.defines << 'HAVE_MRB_PROCESS_H'
+  spec.cc.include_paths << "#{spec.dir}/include/mruby/ext"
 
   if build.test_enabled?
     ENV['RAND'] = Time.now.to_i.to_s
