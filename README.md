@@ -1,4 +1,4 @@
-# mruby-process <br> [![Build Status](https://travis-ci.org/appPlant/mruby-process.svg?branch=master)](https://travis-ci.org/appPlant/mruby-process) [![Build status](https://ci.appveyor.com/api/projects/status/1uu04u7wtbup1oqk/branch/master?svg=true)](https://ci.appveyor.com/project/katzer/mruby-process/branch/master) [![codebeat badge](https://codebeat.co/badges/3c7b24ef-f3d1-460d-95f1-b55b997cbe86)](https://codebeat.co/projects/github-com-appplant-mruby-process-master)
+# mruby-process <br> [![Build Status](https://travis-ci.com/appPlant/mruby-process.svg?branch=master)](https://travis-ci.com/appPlant/mruby-process) [![Build status](https://ci.appveyor.com/api/projects/status/1uu04u7wtbup1oqk/branch/master?svg=true)](https://ci.appveyor.com/project/katzer/mruby-process/branch/master) [![codebeat badge](https://codebeat.co/badges/3c7b24ef-f3d1-460d-95f1-b55b997cbe86)](https://codebeat.co/projects/github-com-appplant-mruby-process-master)
 
 Implementation of the Ruby 2.4.1 Core Library _Process_ for [mruby][mruby].
 
