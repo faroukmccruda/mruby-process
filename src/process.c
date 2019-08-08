@@ -91,15 +91,18 @@ static mrb_value
 mrb_f_abort(mrb_state *mrb, mrb_value klass)
 {
   mrb_value error;
-  int n;
+  mrb_int n;
 
   n = mrb_get_args(mrb, "|S", &error);
 
   if (n != 0) {
-    fprintf(stderr, "%s\n", mrb_str_to_cstr(mrb, error));
+    fprintf(stderr, "%s\n", mrb_string_value_ptr(mrb, error));
   }
 
-  return mrb_exit_common(mrb, 1);
+  _exit(EXIT_FAILURE);
+
+  /* maybe not reached */
+  return mrb_nil_value();
 }
 
 static mrb_value
