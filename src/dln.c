@@ -33,7 +33,7 @@
 # define PATH_SEP ";"
 #endif
 
-#ifndef HAVE_STRLCPY
+#ifdef _WIN32
 static size_t
 strlcpy(char *dst, const char *src, size_t dsize)
 {
@@ -52,8 +52,7 @@ strlcpy(char *dst, const char *src, size_t dsize)
     if (nleft == 0) {
         if (dsize != 0)
             *dst = '\0';        /* NUL-terminate dst */
-        while (*src++)
-            ;
+        while (*src++);
     }
 
     return(src - osrc - 1); /* count does not include NUL */
