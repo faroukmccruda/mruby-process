@@ -33,18 +33,46 @@
 # define PATH_SEP ";"
 #endif
 
+#ifndef HAVE_STRLCPY
+static size_t
+strlcpy(char *dst, const char *src, size_t dsize)
+{
+    const char *osrc = src;
+    size_t nleft = dsize;
+
+    /* Copy as many bytes as will fit. */
+    if (nleft != 0) {
+        while (--nleft != 0) {
+            if ((*dst++ = *src++) == '\0')
+                break;
+        }
+    }
+
+    /* Not enough room in dst, add NUL and traverse rest of src. */
+    if (nleft == 0) {
+        if (dsize != 0)
+            *dst = '\0';        /* NUL-terminate dst */
+        while (*src++)
+            ;
+    }
+
+    return(src - osrc - 1); /* count does not include NUL */
+}
+#endif
+
 static char*
 dln_find_1(const char *fname, const char *path, char *buf, size_t size, int exe_flag);
 
 char*
 dln_find_exe_r(const char *fname, const char *path, char *buf, size_t size)
 {
+    char *envpath = 0;
+
     if (!path) {
         path = getenv(PATH_ENV);
-        if (path) path = strdup(path);
+        if (path) path = envpath = strdup(path);
     }
 
-#if defined(__APPLE__) || defined(__linux__)
     if (!path) {
         path =
             "/usr/local/bin" PATH_SEP
@@ -53,10 +81,9 @@ dln_find_exe_r(const char *fname, const char *path, char *buf, size_t size)
             "/bin" PATH_SEP
             ".";
     }
-#endif
 
     buf = dln_find_1(fname, path, buf, size, 1);
-
+    if (envpath) free(envpath);
     return buf;
 }
 
@@ -69,7 +96,7 @@ dln_find_1(const char *fname, const char *path, char *fbuf, size_t size, int exe
     struct stat st;
     size_t i, fnlen, fspace;
 
-#if !defined(__APPLE__) && !defined(__linux__)
+#ifdef _WIN32
     static const char extension[][5] = {
         ".exe", ".com", ".cmd", ".bat"
     };
@@ -92,16 +119,14 @@ dln_find_1(const char *fname, const char *path, char *fbuf, size_t size, int exe
     if (fnlen >= size)
         return NULL;
 
-#if !defined(__APPLE__) && !defined(__linux__)
+#ifdef _WIN32
 # ifndef CharNext
 #  define CharNext(p) ((p)+1)
 # endif
-# ifdef DOSISH_DRIVE_LETTER
     if (((p[0] | 0x20) - 'a') < 26  && p[1] == ':') {
         p += 2;
         is_abs = 1;
     }
-# endif
     switch (*p) {
       case '/': case '\\':
         is_abs = 1;
@@ -176,7 +201,7 @@ dln_find_1(const char *fname, const char *path, char *fbuf, size_t size, int exe
             **  take the path literally.
             */
             if (*dp == '~' && (l == 1 ||
-#if !defined(__APPLE__) && !defined(__linux__)
+#ifdef _WIN32
                        dp[1] == '\\' ||
 #endif
                        dp[1] == '/')) {
@@ -217,17 +242,15 @@ dln_find_1(const char *fname, const char *path, char *fbuf, size_t size, int exe
         fspace -= i;
         memcpy(bp, fname, i + 1);
 
-#if !defined(__APPLE__) && !defined(__linux__)
+#ifdef _WIN32
         if (exe_flag && !ext) {
             needs_extension:
             for (j = 0; j < sizeof(extension) / sizeof(extension[0]); j++) {
-                if (fspace < strlen(extension[j])) {
+                if (fspace < strlen(extension[j]))
                     continue;
-                }
-                strcpy(bp + i, extension[j]);
-                if (access(fbuf, X_OK) == 0){
+                strlcpy(bp + i, extension[j], fspace);
+                if (stat(fbuf, &st) == 0)
                     return fbuf;
-                }
             }
             goto next;
         }
