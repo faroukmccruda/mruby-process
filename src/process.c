@@ -90,16 +90,17 @@ mrb_exit_common(mrb_state *mrb, int bang)
 static mrb_value
 mrb_f_abort(mrb_state *mrb, mrb_value klass)
 {
+  mrb_value status = mrb_fixnum_value(EXIT_FAILURE);
   mrb_value error;
-  mrb_int n;
+  mrb_int argc;
 
-  n = mrb_get_args(mrb, "|S", &error);
+  argc = mrb_get_args(mrb, "|Si", &error, &status);
 
-  if (n != 0) {
+  if (argc > 0) {
     fprintf(stderr, "%s\n", mrb_string_value_ptr(mrb, error));
   }
 
-  _exit(EXIT_FAILURE);
+  _exit(mrb_fixnum(status));
 
   /* maybe not reached */
   return mrb_nil_value();
@@ -386,7 +387,7 @@ mrb_mruby_process_gem_init(mrb_state *mrb)
   struct RClass *p, *k;
 
   k = mrb->kernel_module;
-  mrb_define_method(mrb, k, "abort",  mrb_f_abort, MRB_ARGS_OPT(1));
+  mrb_define_method(mrb, k, "abort",  mrb_f_abort, MRB_ARGS_OPT(2));
   mrb_define_method(mrb, k, "exit",   mrb_f_exit,  MRB_ARGS_OPT(1));
   mrb_define_method(mrb, k, "exit!",  mrb_f_exit_bang, MRB_ARGS_OPT(1));
   mrb_define_method(mrb, k, "exec",   mrb_f_exec,  MRB_ARGS_REQ(1)|MRB_ARGS_REST());
@@ -395,7 +396,7 @@ mrb_mruby_process_gem_init(mrb_state *mrb)
 
   p = mrb_define_module(mrb, "Process");
   mrb_define_class_method(mrb, p, "argv0",    mrb_proc_argv0, MRB_ARGS_NONE());
-  mrb_define_class_method(mrb, p, "abort",    mrb_f_abort,   MRB_ARGS_OPT(1));
+  mrb_define_class_method(mrb, p, "abort",    mrb_f_abort,   MRB_ARGS_OPT(2));
   mrb_define_class_method(mrb, p, "exit",     mrb_f_exit,    MRB_ARGS_OPT(1));
   mrb_define_class_method(mrb, p, "exit!",    mrb_f_exit_bang, MRB_ARGS_OPT(1));
   mrb_define_class_method(mrb, p, "kill",     mrb_f_kill,    MRB_ARGS_REQ(2)|MRB_ARGS_REST());
