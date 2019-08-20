@@ -28,6 +28,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+extern char **environ;
+
 mrb_value
 mrb_argv0(mrb_state *mrb)
 {
@@ -89,5 +91,5 @@ spawnve(const char *path, char *const argv[], char *const envp[], mrb_value in, 
 pid_t
 spawnv(const char *path, char *const argv[], mrb_value in, mrb_value out, mrb_value err)
 {
-    return spawnve(path, argv, NULL, in, out, err);
+    return spawnve(path, argv, environ, in, out, err);
 }
